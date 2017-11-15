@@ -7,7 +7,7 @@ from mbslave import Config, connect_db, parse_name, check_table_exists, fqn
 
 
 def load_tar(filename, db, config, ignored_schemas, ignored_tables):
-    print "Importing data from", filename
+    print("Importing data from {}".format(filename))
     tar = tarfile.open(filename, 'r:bz2')
     cursor = db.cursor()
     for member in tar:
@@ -17,19 +17,23 @@ def load_tar(filename, db, config, ignored_schemas, ignored_tables):
         schema, table = parse_name(config, name)
         fulltable = fqn(schema, table)
         if schema in ignored_schemas:
-            print " - Ignoring", name
+            print(" - Ignoring {}".format(name))
             continue
         if table in ignored_tables:
-            print " - Ignoring", name
+            print(" - Ignoring {}".format(name))
             continue
         if not check_table_exists(db, schema, table):
-            print " - Skipping %s (table %s does not exist)" % (name, fulltable)
+            print(" - Skipping {} (table {} does not exist)".format(
+                name, fulltable
+            ))
             continue
         cursor.execute("SELECT 1 FROM %s LIMIT 1" % fulltable)
         if cursor.fetchone():
-            print " - Skipping %s (table %s already contains data)" % (name, fulltable)
+            print(" - Skipping {} (table {} already contains data)".format(
+                name, fulltable
+            ))
             continue
-        print " - Loading %s to %s" % (name, fulltable)
+        print(" - Loading {} to {}".format(name, fulltable))
         cursor.copy_from(tar.extractfile(member), fulltable)
         db.commit()
 
@@ -41,3 +45,4 @@ ignored_schemas = set(config.get('schemas', 'ignore').split(','))
 ignored_tables = set(config.get('TABLES', 'ignore').split(','))
 for filename in sys.argv[1:]:
     load_tar(filename, db, config, ignored_schemas, ignored_tables)
+
