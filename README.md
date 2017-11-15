@@ -11,7 +11,13 @@ user to user.
  0. Make sure you have [Python](http://python.org/) and [psycopg2](http://initd.org/psycopg/) installed.
     On Debian and Ubuntu, that means installing these packages:
 
-        sudo apt install python python-psycopg2
+        sudo apt install python3 python3-pip
+        sudo pip3 install --upgrade pip
+        sudo pip3 install virtualenv
+        virtualenv venv
+        source venv/bin/activate
+        pip3 install psycopg2
+        deactivate
 
  1. Create `mbslave.conf` by copying and editing `mbslave.conf.default`.
     You will need to get the API token on the [MetaBrainz website](https://metabrainz.org/supporters/account-type).
@@ -20,8 +26,8 @@ user to user.
     you can use the following commands to setup a clean database:
 
         sudo su - postgres
-        createuser musicbrainz
-        createdb -l C -E UTF-8 -T template0 -O musicbrainz musicbrainz
+        createdb -l C -E UTF-8 -T template0 musicbrainz
+        psql --command="CREATE ROLE musicbrainz WITH LOGIN PASSWORD 'musicbrainz'; GRANT ALL PRIVILEGES ON DATABASE musicbrainz TO musicbrainz;"
         createlang plpgsql musicbrainz
         psql musicbrainz -c 'CREATE EXTENSION cube;'
         psql musicbrainz -c 'CREATE EXTENSION earthdistance;'
@@ -42,6 +48,8 @@ user to user.
 
  3. Download the MusicBrainz database dump files from
     http://ftp.musicbrainz.org/pub/musicbrainz/data/fullexport/
+
+        ./download_latest_musicbrainz_dump.sh
 
  4. Import the data dumps, for example:
 
